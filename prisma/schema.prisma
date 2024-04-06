@@ -14,23 +14,25 @@ datasource db {
 }
 
 model Recipe {
-  id    Int               @id
+  id           Int        @id
   name         String
   img          String
   raw_material String
   step         String
-  duration     String
-  difficult    Level @relation(fields: [levelId], references: [id])
-  levelId Int @unique
+  duration     Duration   @relation(fields: [durationId], references: [id])
+  durationId   Int        @unique
+  difficult    Level      @relation(fields: [levelId], references: [id])
+  levelId      Int        @unique
 }
 
 model Duration {
-  id Int @id
-  time        Int
+  id       Int     @id
+  time     Int
+  duration Recipe?
 }
 
 model Level {
-  id Int   @id
-  level_name    String
-  level         Recipe?
+  id         Int     @id
+  level_name String
+  level      Recipe?
 }

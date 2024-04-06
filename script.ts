@@ -9,20 +9,22 @@ async function main() {
     //     level_name: "ง่าย",
     //   },
     // })
-    // const Level = await prisma.level.findMany()
-    const Recipe = await prisma.recipe.create({
-        data: {
-          id:   1,
-          name: 'กะเพราหมูสับ',
-          img: 'pathToPic',
-          raw_material: "ใบกะเพรา+หมูสับ+กระเทียม",
-          step: "วิธีทำ123",
-          duration: "10นาที",
-          difficult: {
-            connect: { id: 1 }
-          },
-        },
-      })
+    const Recipe = await prisma.recipe.findMany()
+    // const Recipe = await prisma.recipe.create({
+    //     data: {
+    //       id:   1,
+    //       name: 'กะเพราหมูสับ',
+    //       img: 'pathToPic',
+    //       raw_material: "ใบกะเพรา+หมูสับ+กระเทียม",
+    //       step: "วิธีทำ123",
+    //       duration:  {
+    //         connect: { id: 1 }
+    //       },
+    //       difficult: {
+    //         connect: { id: 1 }
+    //       },
+    //     },
+    //   })
     console.log(Recipe)
   }
 
