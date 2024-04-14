@@ -15,7 +15,7 @@ datasource db {
 
 model Recipe {
   id           Int      @id
-  name         String
+  recipe_name         String
   img          String
   raw_material String
   step         String
@@ -47,6 +47,6 @@ model User {
   password String
   salt     String
   role     String @default("member")
-  name     String
+  user_name     String
   user     Recipe?
 }
