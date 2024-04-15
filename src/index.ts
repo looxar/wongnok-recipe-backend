@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 app.use(express.json())
 
 app.use(cors({
-  origin: 'http://localhost:8000',
+  origin: ['http://localhost:8001','http://localhost:3000','http://localhost:8081'],
 }));
 
 app.post(`/signup`, async (req: Request, res: Response) => {
@@ -103,7 +103,7 @@ app.post(`/login`, async (req: Request, res: Response) => {
       const recipes = await prisma.recipe.findMany({
         include: {
           duration: true,
-          level: true,
+          difficult: true,
           user: {
             select: {
               id: true,
@@ -121,23 +121,25 @@ app.post(`/login`, async (req: Request, res: Response) => {
     }
   });
 
-  app.post(`/recipecreate`, checkMemberRole , async (req: Request, res: Response) => {
+  app.post(`/recipecreate`, 
+  // checkMemberRole ,
+   async (req: Request, res: Response) => {
     try {
-      const { menu_name, pathimg, raw_material1, step, duration, difficult, user } =
+      const { menu_name, pathimg, raw_material, step, duration, difficult, user } =
         req.body;
       const result = await prisma.recipe.create({
         data: {
           menu_name: menu_name,
-          img: pathimg,
-          raw_material: raw_material1,
+          pathimg: pathimg,
+          raw_material: raw_material,
           step: step,
-          time: {
+          duration: {
             connect: { id: duration },
           },
-          level_name: {
+          difficult: {
             connect: { id: difficult },
           },
-          user_name: {
+          user: {
             connect: { id: user },
           },
         },
@@ -164,7 +166,7 @@ app.post("/recipe/byduration", async (req: Request, res: Response) => {
       },
       include: {
         duration: true,
-        level: true,
+        difficult: true,
         user: {
           select: {
             id: true,
@@ -196,8 +198,8 @@ app.post("/recipe/bylevel", async (req: Request, res: Response) => {
         levelId: parseInt(setLevel)
       },
       include: {
+        difficult: true,
         duration: true,
-        level: true,
         user: {
           select: {
             id: true,

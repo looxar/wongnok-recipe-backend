@@ -1,8 +1,8 @@
 -- CreateTable
 CREATE TABLE `Recipe` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `recipe_name` VARCHAR(191) NOT NULL,
-    `img` VARCHAR(191) NOT NULL,
+    `menu_name` VARCHAR(191) NOT NULL,
+    `pathimg` VARCHAR(191) NOT NULL,
     `raw_material` VARCHAR(191) NOT NULL,
     `step` VARCHAR(191) NOT NULL,
     `durationId` INTEGER NOT NULL,
@@ -10,9 +10,6 @@ CREATE TABLE `Recipe` (
     `userId` INTEGER NOT NULL,
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `Recipe_durationId_key`(`durationId`),
-    UNIQUE INDEX `Recipe_levelId_key`(`levelId`),
-    UNIQUE INDEX `Recipe_userId_key`(`userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
