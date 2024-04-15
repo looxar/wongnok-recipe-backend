@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Recipe {
-  id           Int      @id
+  id           Int      @id @default(autoincrement())
   recipe_name         String
   img          String
   raw_material String
@@ -29,14 +29,14 @@ model Recipe {
 }
 
 model Duration {
-  id         Int     @id
+  id         Int     @id @default(autoincrement())
   time_start Int
   time_end   Int
   duration   Recipe?
 }
 
 model Level {
-  id         Int     @id
+  id         Int     @id @default(autoincrement())
   level_name String
   level      Recipe?
 }

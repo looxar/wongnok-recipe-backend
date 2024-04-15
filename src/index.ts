@@ -79,6 +79,25 @@ app.post(`/login`, async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+
+  app.get("/user/all", async (req: Request, res: Response) => {
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          user_name: true
+        }
+      });
+  
+      res.json(users);
+    } catch (error) {
+      console.error("Error retrieving users:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.get("/recipe/all", async (req: Request, res: Response) => {
     try {
       const recipes = await prisma.recipe.findMany({
@@ -142,6 +161,39 @@ app.post("/recipe/byduration", async (req: Request, res: Response) => {
     const recipes = await prisma.recipe.findMany({
       where: {
         durationId: parseInt(setDuration)
+      },
+      include: {
+        duration: true,
+        level: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            user_name: true
+          }
+        },
+      }
+    });
+
+    res.json(recipes);
+  } catch (error) {
+    console.error("Error retrieving recipes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/recipe/bylevel", async (req: Request, res: Response) => {
+  try {
+    const { setLevel } = req.body;
+
+    // Check if setDuration is provided and is a valid number
+    if (!setLevel || isNaN(parseInt(setLevel))) {
+      return res.status(400).json({ error: "Invalid or missing 'setDuration' parameter" });
+    }
+
+    const recipes = await prisma.recipe.findMany({
+      where: {
+        levelId: parseInt(setLevel)
       },
       include: {
         duration: true,
