@@ -3,12 +3,11 @@ import { Request, Response, NextFunction } from "express";
 const cors = require("cors");
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-
 const prisma = new PrismaClient();
 const app = express();
-
 const bcrypt = require("bcryptjs");
-
+import multer, { Multer } from 'multer'; 
+const path = require('path');
 app.use(express.json());
 
 app.use(
@@ -26,6 +25,12 @@ app.use(
     ],
   })
 );
+
+app.use('/images', express.static(path.join(__dirname, 'src')));
+
+interface MulterRequest extends Request {
+  file: Express.Multer.File;
+}
 
 app.post(`/signup`, async (req: Request, res: Response) => {
   try {
@@ -99,6 +104,7 @@ const checkMemberRole = async (
 };
 
 app.get("/user/all", async (req: Request, res: Response) => {
+  
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -117,6 +123,7 @@ app.get("/user/all", async (req: Request, res: Response) => {
 });
 
 app.get("/recipe/all", async (req: Request, res: Response) => {
+  console.log("__dirname "+__dirname);
   try {
     const recipes = await prisma.recipe.findMany({
       include: {
@@ -139,48 +146,58 @@ app.get("/recipe/all", async (req: Request, res: Response) => {
   }
 });
 
-app.post(
-  `/recipecreate`,
-  // checkMemberRole ,
-  async (req: Request, res: Response) => {
-    console.log("req.body : " + JSON.stringify(req.body));
-    try {
-      const {
-        params: {
-          menu_name,
-          pathimg,
-          raw_material,
-          step,
-          duration,
-          difficult,
-          user,
-        },
-      } = req.body;
-
-      const result = await prisma.recipe.create({
-        data: {
-          menu_name: menu_name,
-          pathimg: pathimg,
-          raw_material: raw_material,
-          step: step,
-          duration: {
-            connect: { id: duration },
-          },
-          difficult: {
-            connect: { id: difficult },
-          },
-          user: {
-            connect: { id: user },
-          },
-        },
-      });
-      res.json(result);
-    } catch (error) {
-      console.error("Error create recipe:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
+// Set up Multer to store files in the 'uploads' directory
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './recipes-img/');
+  },
+  filename: function (req, file, cb) {
+    // Use a placeholder for the ID in the filename
+    cb(null, 'recipe_' + Date.now() + path.extname(file.originalname));
   }
-);
+});
+
+// Initialize multer with the configured storage options
+const upload = multer({ storage: storage });
+
+app.post(`/recipecreate`, upload.single('image'), async (req: MulterRequest, res: Response) => {
+  try {
+    // const {
+    //   params: {
+    //     menu_name,
+    //     raw_material,
+    //     step,
+    //     duration,
+    //     difficult,
+    //     user,
+    //   },
+    // } = req.body;
+    const { menu_name, raw_material, step, duration, difficult, user } = req.body;
+    const pathimg = req.file ? req.file.filename : null; // Use the filename provided by Multer
+
+    const result = await prisma.recipe.create({
+      data: {
+        menu_name: menu_name,
+        pathimg: pathimg,
+        raw_material: raw_material,
+        step: step,
+        duration: {
+          connect: { id: parseInt(duration) },
+        },
+        difficult: {
+          connect: { id: parseInt(difficult) },
+        },
+        user: {
+          connect: { id: parseInt(user) },
+        },
+      },
+    });
+    res.json(result);
+  } catch (error) {
+    console.error("Error create recipe:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.post("/recipe/byduration", async (req: Request, res: Response) => {
   try {
