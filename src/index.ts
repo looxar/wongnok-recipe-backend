@@ -8,6 +8,7 @@ const app = express();
 const bcrypt = require("bcryptjs");
 import multer, { Multer } from 'multer'; 
 const path = require('path');
+
 app.use(express.json());
 
 app.use(
@@ -19,14 +20,18 @@ app.use(
 app.use(
   cors({
     origin: [
+      "http://localhost:8000",
       "http://localhost:8001",
       "http://localhost:3000",
       "http://localhost:8081",
     ],
   })
 );
-
-app.use('/images', express.static(path.join(__dirname, 'src')));
+app.use(express.static(__dirname + '/public'));
+app.use('/uploads', express.static('recipes-img'));
+//app.use(express.static('public'))
+//app.use('/recipes-img',express.static(path.join(__dirname,'../recipes-img')));
+//app.use('/recipes-img/', express.static(path.join(__dirname, '../', 'recipes-img')));
 
 interface MulterRequest extends Request {
   file: Express.Multer.File;
@@ -149,7 +154,7 @@ app.get("/recipe/all", async (req: Request, res: Response) => {
 // Set up Multer to store files in the 'uploads' directory
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './recipes-img/');
+    cb(null, './recipes-img');
   },
   filename: function (req, file, cb) {
     // Use a placeholder for the ID in the filename
