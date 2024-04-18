@@ -128,7 +128,7 @@ app.get("/user/all", async (req: Request, res: Response) => {
 });
 
 app.get("/recipe/all", async (req: Request, res: Response) => {
-  console.log("__dirname "+__dirname);
+  // console.log("__dirname "+__dirname);
   try {
     const recipes = await prisma.recipe.findMany({
       include: {
@@ -167,16 +167,6 @@ const upload = multer({ storage: storage });
 
 app.post(`/recipecreate`, upload.single('image'), async (req: MulterRequest, res: Response) => {
   try {
-    // const {
-    //   params: {
-    //     menu_name,
-    //     raw_material,
-    //     step,
-    //     duration,
-    //     difficult,
-    //     user,
-    //   },
-    // } = req.body;
     const { menu_name, raw_material, step, duration, difficult, user } = req.body;
     const pathimg = req.file ? req.file.filename : null; // Use the filename provided by Multer
 
@@ -293,11 +283,56 @@ app.post("/recipe/bybothcon", async (req: Request, res: Response) => {
         .status(400)
         .json({ error: "Invalid or missing 'setDuration' parameter" });
     }
-
     const recipes = await prisma.recipe.findMany({
       where: {
         levelId: parseInt(setLevel),
         durationId: parseInt(setDuration),
+      },
+      include: {
+        difficult: true,
+        duration: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            user_name: true,
+          },
+        },
+      },
+    });
+
+    res.json(recipes);
+  } catch (error) {
+    console.error("Error retrieving recipes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/recipe/bytext", async (req: Request, res: Response) => {
+  try {
+    const {
+      params: { setLevel, setDuration, textSearch },
+    } = req.body;
+    // Check if setDuration is provided and is a valid number
+    if (!setLevel || isNaN(parseInt(setLevel))) {
+      return res
+        .status(400)
+        .json({ error: "Invalid or missing 'setDuration' parameter" });
+    }
+    if (!setDuration || isNaN(parseInt(setDuration))) {
+      return res
+        .status(400)
+        .json({ error: "Invalid or missing 'setDuration' parameter" });
+    }
+    const recipes = await prisma.recipe.findMany({
+      where: {
+        OR: [
+          { menu_name: { contains: textSearch } },
+          { raw_material: { contains: textSearch } },
+          { step: { contains: textSearch } },
+        ],
+        // levelId: parseInt(setLevel),
+        // durationId: parseInt(setDuration),
       },
       include: {
         difficult: true,
